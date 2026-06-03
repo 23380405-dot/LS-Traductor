@@ -1,6 +1,6 @@
 {
-  "name": "Sign Language Recognizer",
-  "description": "Aplicación de Reconocimiento de Lengua de Señas en Tiempo Real con simulador web e IDE de código Python.",
+  "name": "SignApp",
+  "description": "Aplicación optimizada de reconocimiento de señas en tiempo real con MediaPipe.",
   "requestFramePermissions": ["camera", "microphone"],
   "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
 }

@@ -1,0 +1,81 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Global Safety Net
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Hardened Global Helpers
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    // Validation functions
+    function isValidSample(data, userId) {
+      return data.keys().hasAll(['label', 'coords', 'userId', 'createdAt'])
+        && data.keys().size() == 4
+        && data.label is string
+        && data.label.size() >= 1
+        && data.label.size() <= 64
+        && data.coords is list
+        && data.coords.size() <= 100
+        && data.userId == userId
+        && data.userId == request.auth.uid
+        && data.createdAt == request.time;
+    }
+
+    function isValidModelCentroid(data, userId) {
+      return data.keys().hasAll(['centroids', 'userId', 'updatedAt'])
+        && data.keys().size() == 3
+        && data.centroids is map
+        && data.userId == userId
+        && data.userId == request.auth.uid
+        && data.updatedAt == request.time;
+    }
+
+    // match users/{userId}/samples/{sampleId}
+    match /users/{userId}/samples/{sampleId} {
+      allow get, list: if isOwner(userId);
+      allow create: if isOwner(userId) 
+        && isValidId(sampleId)
+        && isValidSample(incoming(), userId);
+      allow update: if isOwner(userId)
+        && isValidId(sampleId)
+        && isValidSample(incoming(), userId)
+        && incoming().userId == existing().userId
+        && incoming().createdAt == existing().createdAt;
+      allow delete: if isOwner(userId) && isValidId(sampleId);
+    }
+
+    // match users/{userId}/models/{modelId}
+    match /users/{userId}/models/{modelId} {
+      allow get, list: if isOwner(userId);
+      allow create: if isOwner(userId)
+        && isValidId(modelId)
+        && isValidModelCentroid(incoming(), userId);
+      allow update: if isOwner(userId)
+        && isValidId(modelId)
+        && isValidModelCentroid(incoming(), userId)
+        && incoming().userId == existing().userId;
+      allow delete: if isOwner(userId) && isValidId(modelId);
+    }
+  }
+}

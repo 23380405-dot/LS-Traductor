@@ -59,11 +59,11 @@ class VideoImporterThread(QThread):
             # Omitir frames según skip_frames
             if frame_idx % (self.skip_frames + 1) == 0:
                 # Procesar mano. detect(frame, is_video=True) ya que proviene de un MP4 importado
-                vector, annotated_frame = detector.detect(frame, is_video=True)
+                annotated_frame, vector, _ = detector.detect(frame, is_video=True)
                 
                 # Comprobar si hay al menos una mano detectada (el vector no debe ser completamente nulo)
                 # Si ambas manos son solo ceros, la suma absoluta es cero (no hay manos)
-                if np.any(vector):
+                if vector is not None and np.any(vector):
                     recorder.record(self.label, vector)
                     recorded_count += 1
                     hand_info = "Manos Detectadas"

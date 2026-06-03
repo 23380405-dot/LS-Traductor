@@ -1,0 +1,58 @@
+{
+  "entities": {
+    "Sample": {
+      "title": "Sample",
+      "description": "A single recorded sign language coordinate sample",
+      "type": "object",
+      "properties": {
+        "label": {
+          "type": "string",
+          "description": "Label/name of the gesture in Spanish (e.g. GRACIAS)"
+        },
+        "coords": {
+          "type": "array",
+          "description": "Flat list of 84 normalized coordinates representing wrist and 20 landmarks for left & right hands"
+        },
+        "userId": {
+          "type": "string",
+          "description": "Owner user ID"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": ["label", "coords", "userId", "createdAt"]
+    },
+    "ModelCentroid": {
+      "title": "ModelCentroid",
+      "description": "Trained KNN model centroids representing averages for gestures",
+      "type": "object",
+      "properties": {
+        "centroids": {
+          "type": "object",
+          "description": "Key-value pair of label to 84-dimensional centroid array"
+        },
+        "userId": {
+          "type": "string",
+          "description": "Owner user ID"
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": ["centroids", "userId", "updatedAt"]
+    }
+  },
+  "firestore": {
+    "users/{userId}/samples/{sampleId}": {
+      "schema": "Sample",
+      "description": "Collection of hand gesture samples recorded by the user"
+    },
+    "users/{userId}/models/{modelId}": {
+      "schema": "ModelCentroid",
+      "description": "Collection of trained centroid models for gesture classification"
+    }
+  }
+}

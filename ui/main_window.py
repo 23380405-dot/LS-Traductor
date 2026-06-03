@@ -220,7 +220,9 @@ class CameraThread(QThread):
             frame_mirrored = cv2.flip(frame, 1)
             
             # Procesar el frame usando el corrector de efecto espejo (is_video=False porque es webcam)
-            vector, annotated_frame = self.detector.detect(frame_mirrored, is_video=False)
+            annotated_frame, vector, _ = self.detector.detect(frame_mirrored, is_video=False)
+            if vector is None:
+                vector = np.zeros(84, dtype=np.float32)
             
             self.frame_ready.emit(annotated_frame, vector)
             self.msleep(30) # ~30 FPS
